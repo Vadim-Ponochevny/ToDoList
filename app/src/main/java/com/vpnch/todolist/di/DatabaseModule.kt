@@ -2,6 +2,7 @@ package com.vpnch.todolist.di
 
 import android.content.Context
 import androidx.room.Room
+import com.vpnch.todolist.data.database.TodoDao
 import com.vpnch.todolist.data.database.TodoDatabase
 import dagger.Module
 import dagger.Provides
@@ -15,14 +16,17 @@ import jakarta.inject.Singleton
 object DatabaseModule {
 
     @Provides
-    @Singleton
-    fun provideQuoteDatabase(
+    fun provideTodoDatabase(
         @ApplicationContext context: Context
     ): TodoDatabase {
         return Room.databaseBuilder(
             context,
             TodoDatabase::class.java,
             TodoDatabase.DATABASE_NAME
-        ).fallbackToDestructiveMigration(false).build()
+        ).build()
     }
+
+    @Provides
+    fun provideTodoDao(database: TodoDatabase): TodoDao = database.todoDao()
+
 }

@@ -15,7 +15,6 @@ import jakarta.inject.Singleton
 object RepositoryModule {
 
     @Provides
-    @Singleton
     fun provideTodoRepository(
         dao: TodoDao,
         api: TodoApi

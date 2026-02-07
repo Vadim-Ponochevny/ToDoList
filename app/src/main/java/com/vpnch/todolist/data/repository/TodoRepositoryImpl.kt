@@ -18,13 +18,11 @@ class TodoRepositoryImpl(
         .map { entities -> entities.map { it.toDomain() } }
 
     override suspend fun syncWithRemote() {
-        // ИНТЕРНЕТ ЕСТЬ: API → Room
         val remoteTodos = api.getTodos()
         dao.insertAll(remoteTodos.map { it.toEntity() })
     }
 
     override suspend fun addTodo(title: String) {
-        // БЕЗ ИНТЕРНЕТА: генерируем ID локально
         val maxId = dao.getMaxId() ?: 0
         val localTodo = Todo(maxId + 1, 1, title, false)
         dao.insert(localTodo.toEntity())
