@@ -1,6 +1,8 @@
 package com.vpnch.todolist.data.repository
 
+import android.util.Log
 import com.vpnch.todolist.data.database.TodoDao
+import com.vpnch.todolist.data.model.TodoDto
 import com.vpnch.todolist.data.model.toDomain
 import com.vpnch.todolist.data.model.toEntity
 import com.vpnch.todolist.data.remote.TodoApi
@@ -23,16 +25,52 @@ class TodoRepositoryImpl(
     }
 
     override suspend fun addTodo(title: String) {
-        val maxId = dao.getMaxId() ?: 0
-        val localTodo = Todo(maxId + 1, 1, title, false)
-        dao.insert(localTodo.toEntity())
+        try {
+            val serverTodo = api.createTodo(
+                TodoDto(userId = 1, title = title, completed = false)
+            )
+            dao.insert(serverTodo.toEntity())
+        } catch (e: Exception) {
+            Log.i("Offline mode", "API failed: ${e.message}")
+            val maxId = dao.getMaxId() ?: 0
+            val localTodo = Todo(
+                id = maxId + 1,
+                userId = 1,
+                title = title,
+                completed = false
+            )
+            dao.insert(localTodo.toEntity())
+        }
     }
 
+
     override suspend fun deleteTodo(todo: Todo) {
-        dao.delete(todo.toEntity())
+        try {
+            api.deleteTodo(todo.id)
+            dao.delete(todo.toEntity())
+        } catch (e: Exception) {
+            Log.i("Offline mode", "DELETE API failed: ${e.message}")
+            dao.delete(todo.toEntity())
+        }
     }
 
     override suspend fun toggleTodo(todo: Todo) {
-        dao.insert(todo.copy(completed = !todo.completed).toEntity())
+        try {
+            val updatedTodo = todo.copy(completed = !todo.completed)
+            val serverTodo = api.updateTodo(
+                id = todo.id,
+                todo = TodoDto(
+                    id = todo.id,
+                    userId = todo.userId,
+                    title = todo.title,
+                    completed = updatedTodo.completed
+                )
+            )
+            dao.insert(serverTodo.toEntity())
+        } catch (e: Exception) {
+            Log.i("Offline mode", "TOGGLE API failed: ${e.message}")
+            dao.insert(todo.copy(completed = !todo.completed).toEntity())
+        }
     }
+
 }

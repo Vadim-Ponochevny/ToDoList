@@ -22,10 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -36,7 +35,7 @@ fun TodoScreen(
     viewModel: TodoViewModel = hiltViewModel()
 ) {
     val todos by viewModel.todos.collectAsState()
-    var newTodoText by remember { mutableStateOf("") }
+    var newTodoText by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -47,7 +46,7 @@ fun TodoScreen(
                 ),
                 title = {
                     Text(
-                        text = "Мои задачи",
+                        text = "Tasks",
                     )
                 },
             )
@@ -74,7 +73,7 @@ fun TodoScreen(
             OutlinedTextField(
                 value = newTodoText,
                 onValueChange = { newTodoText = it },
-                label = { Text("Новая задача") },
+                label = { Text("New Task") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
